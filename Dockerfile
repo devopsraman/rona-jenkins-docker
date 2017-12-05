@@ -1,14 +1,20 @@
-FROM jenkins/jenkins:lts
+FROM docker.gillsoft.org/jenkinsci
 
-MAINTAINER Ronan Gill <ronan.gill@gillsoft.org>
+LABEL maintainer="Ronan Gill <ronan.gill@gillsoft.org>"
 
 USER root
-RUN apt-get -qq update  && \
-    apt-get -qq -y install curl && \
-    curl -sSL https://get.docker.com/ | sh && \
-    usermod -a -G staff,docker jenkins && \
-    apt-get clean && \
-    rm /bin/sh && ln -s /bin/bash /bin/sh && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN dpkg-query -l  | grep docker | xargs -r apt-get purge
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg  -o /tmp/docker.gpg
+RUN apt-key add /tmp/docker.gpg
+RUN rm /tmp/docker.gpg
+RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu zesty stable"
+RUN apt-get update
+RUN apt-get -yq dist-upgrade
+RUN apt-get install -y docker-ce
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN usermod -a -G staff,docker jenkins
+
+VOLUME ["/var/lib/docker"]
 
 USER jenkins
