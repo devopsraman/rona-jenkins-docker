@@ -15,6 +15,9 @@ RUN apt-get install -y docker-ce
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 RUN usermod -a -G staff,docker jenkins
 
+# Docker on Centos uses 993 as the GID for docker
+RUN groupadd -g 993 docker2 && usermod -a -G docker2 jenkins
+
 VOLUME ["/var/lib/docker"]
 
 USER jenkins
